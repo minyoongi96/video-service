@@ -2,6 +2,9 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.2.0"
 	id("io.spring.dependency-management") version "1.1.7"
+	`java-test-fixtures`
+	jacoco
+	id("io.freefair.lombok") version "9.8.3"
 }
 
 group = "com.demo"
@@ -17,25 +20,75 @@ repositories {
 	mavenCentral()
 }
 
+sourceSets {
+	create("intTest") {
+		java {
+			srcDir("src/intTest/java")
+		}
+
+		compileClasspath += sourceSets["main"].output + sourceSets["test"].output
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+configurations {
+	named("intTestImplementation") {
+		extendsFrom(configurations["testImplementation"])
+	}
+
+	named("intTestRuntimeOnly") {
+		extendsFrom(configurations["testRuntimeOnly"])
+	}
+}
+
 dependencies {
+	// Spring Boot
+	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-webmvc")
-	compileOnly("org.projectlombok:lombok")
+
+	// Mysqk
 	runtimeOnly("com.mysql:mysql-connector-j")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-	testCompileOnly("org.projectlombok:lombok")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	testAnnotationProcessor("org.projectlombok:lombok")
+
+	compileOnly("org.projectlombok:lombok")
+
+	// Test
+	testImplementation("org.springframework.boot:spring-boot-starter-test-classic")
+	testRuntimeOnly("com.h2database:h2")
+
+	// Embedded MongoDB
+	testRuntimeOnly("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.33.0")
+
+	// Embedded Redis
+	add("intTestImplementation", "com.github.codemonstur:embedded-redis:1.4.4")
+
 }
 
-tasks.withType<Test> {
+tasks.test {
 	useJUnitPlatform()
+}
+
+tasks.register<Test>("intTest") {
+	description = "Runs integration tests."
+	group = "verification"
+
+	testClassesDirs = sourceSets["intTest"].output.classesDirs
+	classpath = sourceSets["intTest"].runtimeClasspath
+
+	shouldRunAfter(tasks.test)
+
+	useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it) {
+				exclude("**/config/*")
+			}
+		})
+	)
 }

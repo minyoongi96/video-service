@@ -10,7 +10,7 @@ build/
 src/main/resources/application.yml
 
 # docker-compose
-src/main/resources/docker-compose.yml
+docker-compose.yml
 
 ### STS ###
 .apt_generated
