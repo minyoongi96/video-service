@@ -45,3 +45,9 @@ out/
 
 ### Mac OS ###
 .DS_Store
+
+# MySQL
+/mysql/data
+
+# MongoDB
+/mongodb/data
