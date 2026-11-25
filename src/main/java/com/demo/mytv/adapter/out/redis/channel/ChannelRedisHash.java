@@ -1,7 +1,6 @@
 package com.demo.mytv.adapter.out.redis.channel;
 
 import com.demo.mytv.domain.channel.Channel;
-import com.demo.mytv.domain.channel.ChannelSnippet;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
