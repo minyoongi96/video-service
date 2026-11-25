@@ -23,6 +23,7 @@ public class ChannelRedisHash {
 
     public Channel toDomain() {
         return Channel.builder()
+                .id(this.getId())
                 .snippet(this.getSnippet().toDomain())
                 .statistics(this.getStatistics().toDomain())
                 .contentOwnerId(contentOwnerId)
