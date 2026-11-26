@@ -82,6 +82,7 @@ tasks.register<Test>("intTest") {
 
 	testClassesDirs = sourceSets["intTest"].output.classesDirs
 	classpath = sourceSets["intTest"].runtimeClasspath
+	systemProperty("spring.profiles.active", "intTest")
 
 	shouldRunAfter(tasks.test)
 
