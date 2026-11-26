@@ -1,4 +1,4 @@
-package com.demo.mytv.application.port.in;
+package com.demo.mytv.application.port.out;
 
 public interface VideoLikePort {
     Long addVideoLike(String videoId, String userId);
