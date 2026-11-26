@@ -9,9 +9,6 @@ build/
 # application.yml
 src/main/resources/application.yml
 
-# application-test.yml
-src/test/resources/application-test.yml
-
 # docker-compose
 docker-compose.yml
 
@@ -58,3 +55,8 @@ out/
 # MongoDB
 /mongodb/data
 
+# application-test.yml
+src/test/resources/application-test.yml
+
+# application-intTest.yml
+src/intTest/resources/application-intTest.yml
