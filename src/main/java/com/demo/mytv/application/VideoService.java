@@ -1,6 +1,7 @@
 package com.demo.mytv.application;
 
 import com.demo.mytv.adapter.in.api.dto.VideoRequest;
+import com.demo.mytv.application.port.out.VideoLikePort;
 import com.demo.mytv.application.port.in.VideoUseCase;
 import com.demo.mytv.application.port.out.LoadChannelPort;
 import com.demo.mytv.application.port.out.LoadVideoPort;
@@ -21,12 +22,13 @@ public class VideoService implements VideoUseCase {
     private final SaveVideoPort saveVideoPort;
     private final LoadChannelPort loadChannelPort;
     private final SaveChannelPort saveChannelPort;
+    private final VideoLikePort videoLikePort;
 
     @Override
     public Video getVideo(String videoId) {
         var video = loadVideoPort.loadVideo(videoId);
         var viewCount = loadVideoPort.getViewCount(videoId);
-        var likeCount = 0L;
+        var likeCount = videoLikePort.getVideoLikeCount(videoId);
         video.bindCount(viewCount, likeCount);
 
         return video;
@@ -37,7 +39,7 @@ public class VideoService implements VideoUseCase {
         return loadVideoPort.loadVideoByChannel(channelId).stream()
                 .map(video -> {
                     var viewCount = loadVideoPort.getViewCount(video.getId());
-                    var likeCount = 0L;
+                    var likeCount = videoLikePort.getVideoLikeCount(video.getId());
                     video.bindCount(viewCount, likeCount);
                     return video;
                 })
