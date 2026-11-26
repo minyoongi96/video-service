@@ -79,6 +79,7 @@ public class VideoPersistenceAdapter implements LoadVideoPort, SaveVideoPort {
 
     @Override
     public void syncViewCount(String videoId) {
+        // DB와 캐시 간 viewCount 동기화
         videoJpaRepository.findById(videoId)
                 .ifPresent(videoJpaEntity -> {
                     // video:view-count:videoId
