@@ -4,7 +4,6 @@ import com.demo.mytv.adapter.out.jpa.video.VideoJpaEntity;
 import com.demo.mytv.adapter.out.jpa.video.VideoJpaEntityFixtures;
 import com.demo.mytv.adapter.out.jpa.video.VideoJpaRepository;
 import demo.mytv.domain.video.VideoFixtures;
-import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
