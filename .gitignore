@@ -9,6 +9,9 @@ build/
 # application.yml
 src/main/resources/application.yml
 
+# application-test.yml
+src/test/resources/application-test.yml
+
 # docker-compose
 docker-compose.yml
 
