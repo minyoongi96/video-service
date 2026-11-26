@@ -9,7 +9,7 @@ public class ChannelSnippetFixtures {
         return ChannelSnippet.builder()
                 .title("title")
                 .description("description")
-                .thumbnailUrl("https://example.com/thumbnail.jpg")
+                .thumbnailUrl("https://test.com/thumbnail.jpg")
                 .publishedAt(LocalDateTime.now())
                 .build();
     }
@@ -18,7 +18,7 @@ public class ChannelSnippetFixtures {
         return ChannelSnippet.builder()
                 .title("title 2")
                 .description("description 2")
-                .thumbnailUrl("https://example.com/thumbnail2.jpg")
+                .thumbnailUrl("https://test.com/thumbnail2.jpg")
                 .publishedAt(LocalDateTime.now())
                 .build();
     }
