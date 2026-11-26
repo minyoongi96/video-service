@@ -57,7 +57,11 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 
 	// Test
-	testImplementation("org.springframework.boot:spring-boot-starter-test-classic")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test")
 	testRuntimeOnly("com.h2database:h2")
 
 	// Embedded MongoDB
