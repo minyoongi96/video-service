@@ -1,6 +1,7 @@
 package com.demo.mytv.adapter.out;
 
 import com.demo.mytv.adapter.out.jpa.channel.ChannelJpaEntity;
+import com.demo.mytv.adapter.out.jpa.channel.ChannelJpaEntityFixtures;
 import com.demo.mytv.adapter.out.jpa.channel.ChannelJpaRepository;
 import com.demo.mytv.adapter.out.redis.channel.ChannelRedisHash;
 import com.demo.mytv.adapter.out.redis.channel.ChannelRedisRepository;
@@ -81,7 +82,7 @@ class ChannelPersistenceAdapterTest {
         given(channelRedisRepository.findById(any()))
                 .willReturn(Optional.empty());
         given(channelJpaRepository.findById(any()))
-                .willReturn(Optional.of(ChannelJpaEntity.from(ChannelFixtures.stub(id))));
+                .willReturn(Optional.of(ChannelJpaEntityFixtures.stub(id)));
 
         // when
         var result = sut.loadChannel(id);
