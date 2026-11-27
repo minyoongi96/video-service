@@ -15,8 +15,7 @@ import java.io.InputStreamReader;
 @TestConfiguration
 public class TestRedisConfig {
     private RedisServer redisServer;
-
-    @Value("${spring.data.redis.port:6380}")
+    @Value("6380")
     private Integer redisPort;
 
     @PostConstruct
@@ -28,9 +27,7 @@ public class TestRedisConfig {
 
     @PreDestroy
     public void preDestroy() throws IOException {
-        if (redisServer != null && redisServer.isActive()) {
-            redisServer.stop();
-        }
+        redisServer.stop();
     }
 
     private Boolean isRedisRunning() throws IOException {
@@ -45,7 +42,7 @@ public class TestRedisConfig {
             }
         }
 
-        throw new IllegalArgumentException("Not Found Availavel Port");
+        throw new IllegalArgumentException("Not Found Available Port");
     }
 
     private Process executeGrepProcessCommand(int port) throws IOException {

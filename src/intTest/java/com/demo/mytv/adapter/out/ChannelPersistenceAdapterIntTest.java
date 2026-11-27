@@ -3,23 +3,31 @@ package com.demo.mytv.adapter.out;
 import com.demo.mytv.adapter.out.jpa.channel.ChannelJpaRepository;
 import com.demo.mytv.adapter.out.redis.channel.ChannelRedisHash;
 import com.demo.mytv.adapter.out.redis.channel.ChannelRedisRepository;
+import com.demo.mytv.config.AnotherTestRedisConfig;
 import com.demo.mytv.config.TestRedisConfig;
 import com.demo.mytv.domain.channel.Channel;
 import com.demo.mytv.domain.channel.ChannelSnippet;
 import com.demo.mytv.domain.channel.ChannelStatistics;
+import demo.mytv.domain.channel.ChannelFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = TestRedisConfig.class)
+@SpringBootTest
+@ContextConfiguration(
+        initializers = AnotherTestRedisConfig.RedisInitializer.class
+)
 @Transactional
 @Sql("/com/demo/mytv/adapter/out/ChannelPersistenceAdapterIntTest.sql")
 public class ChannelPersistenceAdapterIntTest {
@@ -61,13 +69,54 @@ public class ChannelPersistenceAdapterIntTest {
                     .snippet(ChannelSnippet.builder().title("channel").description("desc").thumbnailUrl("thumb").build())
                     .build();
             channelRedisRepository.save(ChannelRedisHash.from(channel));
-            //when(channelRedisRepository.findById("channel1")).thenReturn(Optional.of(ChannelRedisHash.from(ChannelFixtures.stub("channelId"))));
 
             for (int i = 0; i < 3; i++) {
                 sut.loadChannel("channel1");
             }
 
             verify(channelJpaRepository, never()).findById("channel1");
+        }
+
+        @Nested
+        @DisplayName("save Channel")
+        class SaveChannel {
+            @Test
+            void testCreateAndRedisDelete() {
+                var channel = ChannelFixtures.stub("channelTest");
+                sut.saveChannel(channel);
+
+                var savedChannel = channelRedisRepository.findById("channelTest");
+
+                then(savedChannel).isPresent();
+                then(savedChannel.get().getId()).isEqualTo("channelTest");
+            }
+
+            @Test
+            void testUpdateAndLoadChannel() {
+                // given
+                var channel = sut.loadChannel("channel1").get();
+                System.out.println(channel);
+                var updatedChannel = Channel.builder()
+                        .id(channel.getId())
+                        .snippet(ChannelSnippet.builder().title("new title").description("new description").thumbnailUrl("https://test.com/newimage.jpg").build())
+                        .statistics(channel.getStatistics())
+                        .contentOwnerId(channel.getContentOwnerId())
+                        .build();
+
+                // When
+                sut.saveChannel(updatedChannel);
+
+                // Then
+                var result = sut.loadChannel("channel1");
+                then(result)
+                        .isPresent();
+                then(result.get())
+                        .hasFieldOrPropertyWithValue("id", channel.getId())
+                        .hasFieldOrPropertyWithValue("snippet.title", "new title")
+                        .hasFieldOrPropertyWithValue("snippet.description", "new description")
+                        .hasFieldOrPropertyWithValue("snippet.thumbnailUrl", "https://test.com/newimage.jpg");
+                System.out.println(result.get());
+            }
         }
     }
 }

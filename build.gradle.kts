@@ -59,9 +59,9 @@ dependencies {
 	// Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test")
+//	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+//	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-test")
+//	testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test")
 	testRuntimeOnly("com.h2database:h2")
 
 	// Embedded MongoDB
@@ -82,7 +82,13 @@ tasks.register<Test>("intTest") {
 
 	testClassesDirs = sourceSets["intTest"].output.classesDirs
 	classpath = sourceSets["intTest"].runtimeClasspath
+
+	dependsOn(tasks.named("intTestClasses"))
+
 	systemProperty("spring.profiles.active", "intTest")
+	// 테스트 병렬 실행 방지
+//	maxParallelForks = 1
+//	forkEvery = 0
 
 	shouldRunAfter(tasks.test)
 

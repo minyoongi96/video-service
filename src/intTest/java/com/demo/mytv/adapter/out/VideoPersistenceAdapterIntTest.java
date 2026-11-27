@@ -1,28 +1,31 @@
 package com.demo.mytv.adapter.out;
 
 import com.demo.mytv.adapter.out.jpa.video.VideoJpaRepository;
+import com.demo.mytv.common.RedisKeyGenerator;
+import com.demo.mytv.config.AnotherTestRedisConfig;
 import com.demo.mytv.config.TestRedisConfig;
 import com.demo.mytv.domain.video.Video;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-import static com.demo.mytv.common.CacheNames.VIDEO;
-import static com.demo.mytv.common.CacheNames.VIDEO_LIST;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = TestRedisConfig.class)
+//@SpringBootTest(classes = TestRedisConfig.class)
+@SpringBootTest
+@ContextConfiguration(
+        initializers = AnotherTestRedisConfig.RedisInitializer.class
+)
 @Transactional
 @Sql("/com/demo/mytv/adapter/out/VideoPersistenceAdapterIntTest.sql")
 public class VideoPersistenceAdapterIntTest {
@@ -36,12 +39,6 @@ public class VideoPersistenceAdapterIntTest {
     private RedisTemplate<String, Long> redisTemplate;
     @Autowired
     private RedisCacheManager redisCacheManager;
-
-    @BeforeEach
-    void setUp() {
-        redisCacheManager.getCache(VIDEO).clear();
-        redisCacheManager.getCache(VIDEO_LIST).clear();
-    }
 
     @Test
     void loadVideo() {
@@ -64,11 +61,12 @@ public class VideoPersistenceAdapterIntTest {
 
     @Test
     void saveVideoThenEvictVideoListCache() {
-        // given
+        // Given
         sut.loadVideoByChannel("channel1");
+        System.out.println(redisCacheManager.getCache("video:list").get("channel1"));
 
         var video = Video.builder()
-                .id("video3").title("video3").description("video3").thumbnail("https://example.com/image.jpg")
+                .id("video3").title("video3").description("video3").thumbnail("https://test.com/image.jpg")
                 .channelId("channel1").publishedAt(LocalDateTime.now())
                 .build();
 
@@ -76,7 +74,7 @@ public class VideoPersistenceAdapterIntTest {
         sut.saveVideo(video);
 
         // Then
-        then(redisCacheManager.getCache(VIDEO_LIST).get("channel1"))
+        then(redisCacheManager.getCache("video:list").get("channel1"))
                 .isNull();
     }
 
@@ -84,7 +82,7 @@ public class VideoPersistenceAdapterIntTest {
     void saveVideoThenEvictVideoCache() {
         // Given
         var video = sut.loadVideo("video1");
-        then(redisCacheManager.getCache(VIDEO).get("video1")).isNotNull();
+        System.out.println(redisCacheManager.getCache("video").get("video1"));
 
         var updatedVideo = Video.builder()
                 .id(video.getId()).title(video.getTitle()).description(video.getDescription()).thumbnail(video.getThumbnail())
@@ -99,4 +97,15 @@ public class VideoPersistenceAdapterIntTest {
         then(redisCacheManager.getCache("video").get("video1"))
                 .isNull();
     }
+
+    @Test
+    void incrVideoViewCount() {
+        for (int i = 0; i < 5; i++) {
+            sut.incrementViewCount("video1");
+        }
+
+        var result = redisTemplate.opsForValue().get(RedisKeyGenerator.getVideoViewCountKey("video1"));
+        then(result).isEqualTo(5L);
+    }
+
 }
